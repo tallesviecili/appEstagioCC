@@ -40,7 +40,7 @@ $token = $response->access_token;
 $curlA = curl_init();
 
 curl_setopt_array($curlA, array(
-	CURLOPT_URL => "https://api.optimizebpm.com.br/api/v1/customers/6",
+	CURLOPT_URL => "https://api.optimizebpm.com.br/api/v1/customers",
 	CURLOPT_RETURNTRANSFER => true,
 	CURLOPT_ENCODING => "",
 	CURLOPT_MAXREDIRS => 10,
@@ -69,10 +69,11 @@ curl_close($curlA);
 foreach ($dadosA as $conta) {
 	$nome = $conta->name;
 	$contaID = $conta->id;
+	$workspace = $conta->bpms_workspace;
 	echo $nome.'<br>';
 	echo $contaID.'<br>';
 	
-	if ($contaID > 0) {
+	if ($contaID > 0 and $workspace <> 'workflow11' and $workspace <> 'workflow23' and $workspace <> 'workflow' and $workspace <> 'optimize1') {
 
 		$curlB = curl_init();
 
