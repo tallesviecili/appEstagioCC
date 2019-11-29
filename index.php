@@ -1,6 +1,7 @@
 
 <?php 
 
+session_start();
 set_time_limit(0);
 // Iniciamos o "contador"
 list($usec, $sec) = explode(' ', microtime());
@@ -11,6 +12,10 @@ $contaID = null;
 
 //ini_set('error_reporting', E_ALL); // mesmo resultado de: error_reporting(E_ALL);
 //ini_set('display_errors', 1);
+
+/*
+	Request API para gerar TOKEN.
+*/
 
 $curl = curl_init();
 
@@ -37,6 +42,10 @@ curl_close($curl);
 
 $token = $response->access_token;
 
+/*
+	Request API para buscar contas.
+*/
+
 $curlA = curl_init();
 
 curl_setopt_array($curlA, array(
@@ -48,15 +57,10 @@ curl_setopt_array($curlA, array(
 	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 	CURLOPT_CUSTOMREQUEST => "GET",
 	CURLOPT_HTTPHEADER => array(
-		"Accept: */*",
-		"Accept-Encoding: gzip, deflate",
 		"Authorization: Bearer ".$token,
 		"Cache-Control: no-cache",
 		"Connection: keep-alive",
-		"Host: api.optimizebpm.com.br",
 		"Postman-Token: 0c7402b4-2284-4ce7-9316-9ee4ab25e89c,000989f7-d1bf-451c-b4f4-8b531a9be2fa",
-		"User-Agent: PostmanRuntime/7.18.0",
-		"cache-control: no-cache"
 	),
 ));
 
@@ -70,10 +74,15 @@ foreach ($dadosA as $conta) {
 	$nome = $conta->name;
 	$contaID = $conta->id;
 	$workspace = $conta->bpms_workspace;
-	echo $nome.'<br>';
-	echo $contaID.'<br>';
 	
-	if ($contaID > 0 and $workspace <> 'workflow11' and $workspace <> 'workflow23' and $workspace <> 'workflow' and $workspace <> 'optimize1') {
+	//if ($contaID > 0 and $contaID <> 50 or $contaID <> 68 or $contaID <> 4 or $contaID <> 16 or $contaID <> 22) }
+	if ($contaID == 6) {
+
+	echo '<br>'.$nome.' - ID: '.$contaID.'<br>';
+
+/*
+	Request API para buscar usuário por respectiva conta.
+*/
 
 		$curlB = curl_init();
 
@@ -86,15 +95,10 @@ foreach ($dadosA as $conta) {
 			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 			CURLOPT_CUSTOMREQUEST => "GET",
 			CURLOPT_HTTPHEADER => array(
-				"Accept: *//*",
-				"Accept-Encoding: gzip, deflate",
 				"Authorization: Bearer ".$token,
 				"Cache-Control: no-cache",
 				"Connection: keep-alive",
-				"Host: api.optimizebpm.com.br",
 				"Postman-Token: 26b988e9-12d3-4f0a-a0d1-36fbbd3413bd,4e9373bb-b1b0-4df0-81e2-068814d0fc60",
-				"User-Agent: PostmanRuntime/7.18.0",
-				"cache-control: no-cache"
 			),
 		));
 
@@ -107,9 +111,11 @@ foreach ($dadosA as $conta) {
 			$nome = $usuario->name;
 			$usuarioID = $usuario->id;
 			$email = $usuario->email;
+			if ($usuarioID == 318 or $usuarioID == 8) {
 
-				//Tarefas do Sintonia
-			//$hoje = date();
+/*
+	Request API para buscar tarefas por respectivo usuário.
+*/
 
 			$curlC = curl_init();
 
@@ -135,18 +141,10 @@ foreach ($dadosA as $conta) {
 			$dadosC = json_decode($responseC);
 			curl_close($curlC);
 
-				//Resultdo contagem tarefas No prazo e Em atraso
-			$noPrazoTarefas = $dadosC->noPrazo;
-			$emAtrasoTarefas = $dadosC->emAtraso;
-			$totalTarefas = $noPrazoTarefas + $emAtrasoTarefas;
+/*
+	Request API para buscar projeto e plano de ações por respectivo usuário.
+*/
 
-			echo $nome.'<br>';
-			echo "Tarefas no prazo: ".$noPrazoTarefas.'<br>';
-			echo "Tarefas em atraso: ".$emAtrasoTarefas.'<br>';
-			echo "Tarefas total: ".$totalTarefas.'<br>';
-			echo "<br>";
-
-				//Projetos e Planos de Ação
 			$curlD = curl_init();
 
 			curl_setopt_array($curlD, array(
@@ -171,25 +169,52 @@ foreach ($dadosA as $conta) {
 			$dadosD = json_decode($responseD);
 			curl_close($curlD);
 
-					//Resultdo contagem plano ação No prazo e Em atraso
-			$noPrazoPlanoAcao = $dadosD->noPrazo;
-			$emAtrasoPlanoAcao = $dadosD->emAtraso;
-			$totalPlanoAcao = $noPrazoPlanoAcao + $emAtrasoPlanoAcao;
+			$_SESSION['nome'] = $nome;
+			$_SESSION['email'] = $email;
+/*
+	Resultdo contagem tarefas No prazo e Em atraso
+*/
+			$_SESSION['noPrazoTarefas'] = $noPrazoTarefas = $dadosC->noPrazo;
+			$_SESSION['emRiscoTarefas'] = $emRiscoTarefas = $dadosC->emRisco;
+			$_SESSION['emAtrasoTarefas'] = $emAtrasoTarefas = $dadosC->emAtraso;
+			$_SESSION['totalTarefas'] = $totalTarefas = $noPrazoTarefas + $emAtrasoTarefas + $emRiscoTarefas;
+
+			echo $nome.'<br>';
+			echo "Tarefas no prazo: ".$noPrazoTarefas.'<br>';
+			echo "Tarefas em risco: ".$emRiscoTarefas.'<br>';
+			echo "Tarefas em atraso: ".$emAtrasoTarefas.'<br>';
+			echo "Tarefas total: ".$totalTarefas.'<br>';
+			echo "<br>";
+/*
+	Resultdo contagem plano ação No prazo e Em atraso
+*/
+			$_SESSION['noPrazoPlanoAcao'] = $noPrazoPlanoAcao = $dadosD->noPrazo;
+			$_SESSION['emRiscoPlanoAcao'] = $emRiscoPlanoAcao = $dadosD->emRisco;
+			$_SESSION['emAtrasoPlanoAcao'] = $emAtrasoPlanoAcao = $dadosD->emAtraso;
+			$_SESSION['totalPlanoAcao'] = $totalPlanoAcao = $noPrazoPlanoAcao + $emAtrasoPlanoAcao + $emRiscoPlanoAcao;
 
 			echo "Ações e Projeto no prazo: ".$noPrazoPlanoAcao.'<br>';
+			echo "Ações e Projeto em risco: ".$emRiscoPlanoAcao.'<br>';
 			echo "Ações e Projeto em atraso: ".$emAtrasoPlanoAcao.'<br>';
 			echo "Ações e Projeto total: ".$totalPlanoAcao.'<br>';
 			echo "------------------------------------------------------<br>";
 
+			require 'enviarEmail.php';
+			}
 			$alerta = NULL;
 		}
 
 		$nome = null;
 		$email = null;
 		$userID = null;
-		$atrasadas = 0;
-		$noPrazo = 0;
+		$noPrazoTarefas = 0;
+		$emRiscoTarefas = 0;
+		$emAtrasoTarefas = 0;
 		$totalTarefas = 0;
+		$noPrazoPlanoAcao = 0;
+		$emRiscoPlanoAcao = 0;
+		$emAtrasoPlanoAcao = 0;
+		$totalPlanoAcao = 0;
 
 	}
 }
