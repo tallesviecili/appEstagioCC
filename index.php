@@ -27,7 +27,7 @@ curl_setopt_array($curl, array(
 	CURLOPT_TIMEOUT => 30,
 	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 	CURLOPT_CUSTOMREQUEST => "POST",
-	CURLOPT_POSTFIELDS => "client_id=9&client_secret=X7AAh0GEwNT0XkVbBmlJZXI6dbdhSlSTvPn69n7Z&username=app@plataformasintonia.com&password=NfmNXpHZT.=h&grant_type=password&scope=*",
+	CURLOPT_POSTFIELDS => "",
 	CURLOPT_HTTPHEADER => array(
 		"Cache-Control: no-cache",
 		"Content-Type: application/x-www-form-urlencoded",
